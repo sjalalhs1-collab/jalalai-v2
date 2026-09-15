@@ -1,0 +1,11 @@
+export type TaskMode='fast'|'deep'|'verified';
+export type TaskStatus='planning'|'running'|'verifying'|'completed'|'failed';
+export type Permission='web'|'files'|'code'|'externalActions'|'sensitiveData';
+export interface PermissionSet{web:boolean;files:boolean;code:boolean;externalActions:boolean;sensitiveData:boolean}
+export interface TaskAttachment{id:string;name:string;type?:string;text:string;size:number}
+export interface TaskRequest{id:string;input:string;mode:TaskMode;language?:string;context?:Record<string,unknown>;permissions?:PermissionSet;attachments?:TaskAttachment[]}
+export interface TaskStep{id:string;goal:string;expert:string;tools:string[];dependsOn:string[];verification:string[]}
+export interface TaskPlan{taskId:string;steps:TaskStep[];rationale:string}
+export interface Evidence{source:string;claim:string;confidence:number;retrievedAt:number}
+export interface AgentOutput{expert:string;text:string;confidence:number;evidence:Evidence[]}
+export interface TaskResult{taskId:string;status:TaskStatus;answer?:string;confidence:number;evidence:Evidence[];errors:string[];traceId:string;plan?:TaskPlan;steps?:AgentOutput[]}

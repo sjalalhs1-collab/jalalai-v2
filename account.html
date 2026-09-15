@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0A0A10">
+<title>Your JalalAI account</title>
+<link rel="icon" href="/assets/jalalai-icon-32.png">
+<style>
+  :root{--bg:#0A0A10;--surface:#14151F;--line:#2A2C3C;--ink:#F5F6FB;--muted:#9A9DB5;--sapphire:#3E8EF7;--violet:#9B5CF6;--gold:#F4C15C;--ruby:#E23B6E}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:24px;text-decoration:none;color:inherit}
+  .brand img{width:30px;height:30px;border-radius:8px}
+  .brand span{font-weight:700;background:linear-gradient(90deg,var(--gold),var(--ruby) 60%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+  h1{font-size:1.3rem;margin:0 0 6px}
+  p.sub{color:var(--muted);font-size:.9rem;margin:0 0 22px}
+  label{display:block;font-size:.85rem;color:var(--muted);margin:14px 0 6px}
+  input{width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--line);background:#0d0e16;color:var(--ink);font-size:.95rem}
+  select{width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--line);background:#0d0e16;color:var(--ink);font-size:.95rem;margin-top:6px}
+  input:focus{outline:2px solid var(--sapphire);outline-offset:1px;border-color:var(--sapphire)}
+  button:focus-visible,a:focus-visible{outline:2px solid var(--sapphire);outline-offset:2px}
+  button{width:100%;margin-top:22px;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--sapphire),var(--violet));color:#fff;font-weight:600;font-size:.95rem;cursor:pointer}
+  button:disabled{opacity:.6;cursor:default}
+  .toggle{margin-top:18px;text-align:center;font-size:.88rem;color:var(--muted)}
+  .toggle a{color:var(--sapphire);text-decoration:none;cursor:pointer}
+  .msg{margin-top:14px;font-size:.85rem;padding:10px 12px;border-radius:8px;display:none}
+  .msg.error{display:block;background:rgba(226,59,110,.12);color:#ffb3c6;border:1px solid rgba(226,59,110,.3)}
+  .msg.ok{display:block;background:rgba(51,214,166,.1);color:#8ff0d0;border:1px solid rgba(51,214,166,.3)}
+  .account{display:none}
+  .account.show{display:block}
+  .auth.hide{display:none}
+  .row{display:flex;justify-content:space-between;font-size:.9rem;padding:10px 0;border-top:1px solid var(--line)}
+  .row:first-of-type{border-top:none}
+  .plan-pill{display:inline-block;padding:4px 10px;border-radius:99px;background:rgba(244,193,92,.15);color:var(--gold);font-size:.8rem;font-weight:600}
+  .linkbtn{display:block;text-align:center;margin-top:20px;color:var(--muted);font-size:.85rem;text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <a class="brand" href="/home.html"><img src="/assets/jalalai-icon-192.png" alt=""><span>JalalAI</span></a>
+
+  <div id="authView" class="auth">
+    <h1 id="authTitle">Log in</h1>
+    <p class="sub" id="authSub">Welcome back — pick up where you left off.</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="At least 8 characters">
+    <button id="submitBtn">Log in</button>
+    <div class="toggle" id="toggleText">Don't have an account? <a id="toggleLink">Sign up</a></div>
+    <div id="msg" class="msg"></div>
+  </div>
+
+  <div id="accountView" class="account">
+    <h1>Your account</h1>
+    <p class="sub" id="accountEmail"></p>
+    <div class="row"><span>Plan</span><span class="plan-pill" id="planPill">Free</span></div>
+    <div class="row"><span>Prompts used today</span><span id="usedToday">0 / 40</span></div>
+    <div id="upgradeBlock">
+      <label for="planSelect">Upgrade to</label>
+      <select id="planSelect" style="margin-bottom:0">
+        <option value="pro">Pro — PKR 1,000/mo</option>
+        <option value="ultra">Ultra — PKR 3,000/mo</option>
+      </select>
+      <button id="upgradeBtn">Continue to payment</button>
+    </div>
+    <a class="linkbtn" href="/index.html">Open the app →</a>
+    <a class="linkbtn" href="#" id="logoutLink">Log out</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TOKEN_KEY = 'jalalai_session_token';
+  var mode = 'login';
+  var authView = document.getElementById('authView');
+  var accountView = document.getElementById('accountView');
+  var msg = document.getElementById('msg');
+
+  function showMsg(text, kind){
+    msg.textContent = text;
+    msg.className = 'msg ' + kind;
+  }
+
+  function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+  function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
+  function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+
+  async function refreshAccount(){
+    var token = getToken();
+    if (!token) { authView.classList.remove('hide'); accountView.classList.remove('show'); return; }
+    try {
+      var res = await fetch('/v1/me', { headers: { authorization: 'Bearer ' + token } });
+      if (!res.ok) { clearToken(); authView.classList.remove('hide'); accountView.classList.remove('show'); return; }
+      var data = await res.json();
+      document.getElementById('accountEmail').textContent = '';
+      document.getElementById('planPill').textContent = data.entitlement.planId.toUpperCase();
+      var limit = data.entitlement.dailyPromptLimit;
+      document.getElementById('usedToday').textContent = data.entitlement.promptsUsedToday + (limit === null ? ' (unlimited)' : ' / ' + limit);
+      var upgradeBlock = document.getElementById('upgradeBlock');
+      if (data.entitlement.planId === 'free') {
+        upgradeBlock.style.display = 'block';
+      } else {
+        upgradeBlock.style.display = 'none';
+      }
+      authView.classList.add('hide');
+      accountView.classList.add('show');
+    } catch (e) {
+      authView.classList.remove('hide'); accountView.classList.remove('show');
+    }
+  }
+
+  function attachToggleHandler(){
+    var link = document.getElementById('toggleLink');
+    if (link) link.addEventListener('click', onToggleClick);
+  }
+
+  function onToggleClick(){
+    mode = mode === 'login' ? 'register' : 'login';
+    document.getElementById('authTitle').textContent = mode === 'login' ? 'Log in' : 'Create your account';
+    document.getElementById('authSub').textContent = mode === 'login' ? 'Welcome back — pick up where you left off.' : '40 free prompts a day. No card required.';
+    document.getElementById('submitBtn').textContent = mode === 'login' ? 'Log in' : 'Create account';
+    document.getElementById('toggleText').innerHTML = mode === 'login'
+      ? 'Don\'t have an account? <a id="toggleLink">Sign up</a>'
+      : 'Already have an account? <a id="toggleLink">Log in</a>';
+    attachToggleHandler();
+    msg.className = 'msg';
+  }
+
+  attachToggleHandler();
+
+  document.getElementById('submitBtn').addEventListener('click', async function(){
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
+    if (!email || !password) { showMsg('Enter an email and password.', 'error'); return; }
+    var endpoint = mode === 'login' ? '/v1/auth/login' : '/v1/auth/register';
+    document.getElementById('submitBtn').disabled = true;
+    try {
+      var res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password }),
+      });
+      var data = await res.json();
+      if (!res.ok) {
+        var reasons = { email_taken: 'That email is already registered — try logging in instead.', invalid_credentials: 'Wrong email or password.', account_suspended: 'This account has been suspended.', weak_password: 'Password must be at least 8 characters.', invalid_email: 'Enter a valid email address.' };
+        showMsg(reasons[data.error] || 'Something went wrong. Try again.', 'error');
+        return;
+      }
+      setToken(data.token);
+      showMsg('', '');
+      await refreshAccount();
+    } catch (e) {
+      showMsg('Could not reach the server. Check your connection.', 'error');
+    } finally {
+      document.getElementById('submitBtn').disabled = false;
+    }
+  });
+
+  document.getElementById('logoutLink').addEventListener('click', async function(e){
+    e.preventDefault();
+    var token = getToken();
+    if (token) {
+      try { await fetch('/v1/auth/logout', { method: 'POST', headers: { authorization: 'Bearer ' + token } }); } catch (e) {}
+    }
+    clearToken();
+    location.reload();
+  });
+
+  document.getElementById('upgradeBtn').addEventListener('click', async function(){
+    var token = getToken();
+    if (!token) return;
+    var planId = document.getElementById('planSelect').value;
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Preparing checkout…';
+    try {
+      var res = await fetch('/v1/billing/create-order', {
+        method: 'POST',
+        headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+        body: JSON.stringify({ planId: planId, gateway: 'jazzcash' }),
+      });
+      if (!res.ok) { showMsg('Could not start checkout. Try again.', 'error'); btn.disabled = false; btn.textContent = 'Continue to payment'; return; }
+      var order = await res.json();
+      location.href = '/v1/billing/jazzcash/checkout?orderRef=' + encodeURIComponent(order.orderRef);
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Continue to payment';
+    }
+  });
+
+  refreshAccount();
+})();
+</script>
+</body>
+</html>
