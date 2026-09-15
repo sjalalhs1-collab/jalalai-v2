@@ -1,0 +1,14 @@
+{
+  "currency": "PKR",
+  "fairUse": true,
+  "plans": [
+    {"id":"free","name":"Free","monthlyPrice":0,"yearlyPrice":0,"dailyPrompts":40,"priority":"standard","features":["core-ai","standard-speed","essential-research","basic-files"]},
+    {"id":"pro","name":"Pro","monthlyPrice":1000,"yearlyPrice":10000,"dailyPrompts":null,"priority":"priority","features":["unlimited-prompts-fair-use","advanced-features","priority-speed","larger-workflows"]},
+    {"id":"ultra","name":"Ultra","monthlyPrice":3000,"yearlyPrice":30000,"dailyPrompts":null,"priority":"maximum","features":["unlimited-prompts-fair-use","maximum-processing-priority","experimental-updates","priority-media","larger-workflows"]}
+  ],
+  "billing": {
+    "android": "Google Play Billing with server-side purchase verification",
+    "web": "Compliant web payment gateway with server-side entitlement verification",
+    "entitlementSource": "central-backend"
+  }
+}

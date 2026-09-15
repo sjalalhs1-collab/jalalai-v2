@@ -1,0 +1,2 @@
+import type {Tool} from './registry.js';
+export const webOpenTool:Tool={id:'web.open',description:'Fetch a public HTTP(S) page as text',permission:'web',async execute(input,ctx){if(!ctx.permissions.web)throw new Error('Permission denied: web');const url=String(input);if(!/^https?:\/\//i.test(url))throw new Error('Only HTTP(S) URLs are allowed');const r=await fetch(url,{redirect:'follow'});if(!r.ok)throw new Error(`HTTP ${r.status}`);const text=await r.text();return {url,status:r.status,text:text.slice(0,20000)}}};

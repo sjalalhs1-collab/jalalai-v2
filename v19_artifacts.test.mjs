@@ -1,0 +1,2 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import {createArtifact} from '../dist/index.js'; import {stat,rm} from 'node:fs/promises'; import {join} from 'node:path';
+test('v1.9 creates real Office artifacts',async()=>{const dir=join(process.cwd(),'data','test-artifacts'); for(const kind of ['docx','xlsx','pptx']){const r=await createArtifact({kind,name:'test-'+kind,title:'Test',content:'Name,Value\nA,10\nB,20',slides:['One','Two']},dir); const s=await stat(r.path); assert.ok(s.size>500); await rm(r.path,{force:true})} });

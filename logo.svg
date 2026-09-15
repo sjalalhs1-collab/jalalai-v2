@@ -1,0 +1,41 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JalalAI logo">
+  <defs>
+    <linearGradient id="mark" x1="80" y1="60" x2="432" y2="452" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4EA1FF"/>
+      <stop offset="0.5" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#161B3A"/>
+      <stop offset="1" stop-color="#0B0E1A"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="url(#bg)"/>
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="none" stroke="#2A3160" stroke-width="2"/>
+
+  <!-- network motif: quiet, orbiting the mark -->
+  <g opacity="0.55" stroke="#4A5590" stroke-width="1.4" fill="none">
+    <circle cx="256" cy="240" r="152"/>
+    <line x1="256" y1="88" x2="130" y2="200"/>
+    <line x1="256" y1="88" x2="382" y2="200"/>
+    <line x1="130" y1="200" x2="130" y2="316"/>
+    <line x1="382" y1="200" x2="382" y2="316"/>
+    <line x1="130" y1="316" x2="256" y2="392"/>
+    <line x1="382" y1="316" x2="256" y2="392"/>
+  </g>
+  <g fill="#F5B942">
+    <circle cx="256" cy="88" r="6"/>
+    <circle cx="130" cy="200" r="5"/>
+    <circle cx="382" cy="200" r="5"/>
+    <circle cx="130" cy="316" r="5"/>
+    <circle cx="382" cy="316" r="5"/>
+    <circle cx="256" cy="392" r="6"/>
+  </g>
+
+  <!-- JA monogram -->
+  <text x="256" y="298" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="220" font-weight="700" fill="url(#mark)">JA</text>
+
+  <!-- accent star -->
+  <path d="M 372 128 l 8 18 l 18 8 l -18 8 l -8 18 l -8 -18 l -18 -8 l 18 -8 z" fill="#F5B942"/>
+</svg>

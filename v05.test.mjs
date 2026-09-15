@@ -1,0 +1,5 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import {rmSync,mkdirSync} from 'node:fs';
+import {CriticAgent} from '../dist/critique/critic.js'; import {JsonFileStore} from '../dist/memory/store.js'; import {EvidenceEngine} from '../dist/research/evidence.js';
+test('critic requires evidence for verified mode',()=>{const c=new CriticAgent();assert.equal(c.review('Useful answer',[], 'verified').pass,false)});
+test('evidence engine ranks search hits',()=>{const e=new EvidenceEngine().fromSearch([{title:'A',url:'https://a.test',snippet:'',source:'a.test'},{title:'B',url:'https://b.test',snippet:'',source:'b.test'}],'claim');assert.equal(e.length,2);assert.ok(e[0].confidence>e[1].confidence)});
+test('json memory persists records',()=>{const p='./data/test-memory.json';mkdirSync('./data',{recursive:true});rmSync(p,{force:true});const a=new JsonFileStore(p);a.put({id:'x',taskId:'t',content:'payroll audit',tags:['hr'],createdAt:1,evidence:[]});const b=new JsonFileStore(p);assert.equal(b.search('payroll')[0].id,'x');rmSync(p,{force:true})});

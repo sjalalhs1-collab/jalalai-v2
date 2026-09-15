@@ -1,0 +1,80 @@
+{
+  "jobs": [
+    {
+      "id": "final-smoke-1",
+      "status": "completed",
+      "createdAt": 1789105732069,
+      "updatedAt": 1789105732074,
+      "attempts": 1,
+      "maxAttempts": 3,
+      "requireApproval": false,
+      "input": "Explain a simple payroll audit plan",
+      "mode": "fast",
+      "attachments": [],
+      "permissions": {
+        "web": true,
+        "files": false,
+        "code": false,
+        "externalActions": false,
+        "sensitiveData": false
+      },
+      "startedAt": 1789105732069,
+      "result": {
+        "taskId": "final-smoke-1",
+        "status": "completed",
+        "answer": "[expert.payroll]\nDEMO MODE — no external model API is configured.\n\nTask received:\nTask: Explain a simple payroll audit plan\nGoal: Analyze and solve the payroll aspects of the task\nAttached files:\n\nEvidence:\n\nRelevant memory:\n\nSemantic evidence:\n\nKnowledge Vault:\nattachment://a1 — Important project notes.\nTool results:\n\n\nConfigure OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY for real model execution.\n\n[expert.audit]\nDEMO MODE — no external model API is configured.\n\nTask received:\nTask: Explain a simple payroll audit plan\nGoal: Analyze and solve the audit aspects of the task\nAttached files:\n\nEvidence:\n\nRelevant memory:\n\nSemantic evidence:\n\nKnowledge Vault:\nattachment://a1 — Important project notes.\nTool results:\n\n\nConfigure OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY for real model execution.",
+        "confidence": 0.7,
+        "evidence": [],
+        "errors": [],
+        "traceId": "57e60bb6-8a47-445c-8a17-5b3115bf57f2",
+        "plan": {
+          "taskId": "final-smoke-1",
+          "steps": [
+            {
+              "id": "step-1",
+              "goal": "Analyze and solve the payroll aspects of the task",
+              "expert": "expert.payroll",
+              "tools": [],
+              "dependsOn": [],
+              "verification": [
+                "critic.review",
+                "confidence.score"
+              ]
+            },
+            {
+              "id": "step-2",
+              "goal": "Analyze and solve the audit aspects of the task",
+              "expert": "expert.audit",
+              "tools": [],
+              "dependsOn": [
+                "step-1"
+              ],
+              "verification": [
+                "critic.review",
+                "confidence.score"
+              ]
+            }
+          ],
+          "rationale": "Detected domains: payroll, audit"
+        },
+        "steps": [
+          {
+            "expert": "expert.payroll",
+            "text": "DEMO MODE — no external model API is configured.\n\nTask received:\nTask: Explain a simple payroll audit plan\nGoal: Analyze and solve the payroll aspects of the task\nAttached files:\n\nEvidence:\n\nRelevant memory:\n\nSemantic evidence:\n\nKnowledge Vault:\nattachment://a1 — Important project notes.\nTool results:\n\n\nConfigure OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY for real model execution.",
+            "confidence": 0.75,
+            "evidence": []
+          },
+          {
+            "expert": "expert.audit",
+            "text": "DEMO MODE — no external model API is configured.\n\nTask received:\nTask: Explain a simple payroll audit plan\nGoal: Analyze and solve the audit aspects of the task\nAttached files:\n\nEvidence:\n\nRelevant memory:\n\nSemantic evidence:\n\nKnowledge Vault:\nattachment://a1 — Important project notes.\nTool results:\n\n\nConfigure OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY for real model execution.",
+            "confidence": 0.75,
+            "evidence": []
+          }
+        ]
+      },
+      "finishedAt": 1789105732074
+    }
+  ],
+  "approvals": [],
+  "queue": []
+}

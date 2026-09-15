@@ -1,0 +1,198 @@
+JalalAI v1.9.2 — FINAL HARDENED RELEASE CANDIDATE
+
+Highlights:
+- Final JalalAI logo + app/PWA icon assets
+- Authenticated task event streaming
+- PWA manifest, favicon, robots.txt and sitemap
+- Security baseline + deployment gate documentation
+- Free / Pro / Ultra entitlement definition
+- Version consistency: 1.9.2
+- 42/42 automated tests pass
+
+Important:
+This is a validated release candidate, not a claim of deployed SaaS or Play Store publication. External production gates are documented.
+
+v1.9.3 — Monetization Readiness
+- Added typed entitlement decision logic for Free/Pro/Ultra.
+- Added monetization readiness gate and launch checklist.
+- Added a public pricing page at /pricing.
+- Added billing environment placeholders; billing remains disabled until real providers are configured.
+
+v1.9.6 security/deployment gate additions:
+- Added production security hardening checklist.
+- Added safe environment-variable template.
+- Added search visibility policy clarifying robots.txt versus real authorization.
+- No live credentials, billing integration, or deployment secrets included.
+
+v1.9.8 — Production Foundation Contracts
+- Added provider-neutral production contracts for identity, entitlements, tasks, permissions, and adapters.
+- Added Gate A implementation and release requirements.
+- Added contract/documentation tests.
+- This remains a release-candidate foundation, not a deployed production backend.
+
+v1.9.10 — Identity & Entitlements Gate (Gate B, docs/GATE_B_IDENTITY_ENTITLEMENTS.md)
+Fixed:
+- `npm run build` was broken in the packaged v1.9.9 baseline (`tsconfig.json` was missing `rootDir`, causing TS5011). Fixed. Verify this still builds before further work.
+Added:
+- Real server-side identity: registration, login, scrypt-hashed passwords, hashed random session tokens with expiry and revocation (`src/identity/`).
+- `/v1/auth/register`, `/v1/auth/login`, `/v1/auth/logout`, `/v1/me` endpoints.
+- `/v1/tasks` now resolves a server-side user identity per request (session token or the existing operator token, kept for backward compatibility) and enforces the free-plan 40-prompts/rolling-UTC-day limit *before* running the task (HTTP 402 on breach). Pro/Ultra remain fair-use unlimited.
+- `/v1/admin/entitlements/grant` for operator-token-authenticated plan grants/upgrades.
+- Full audit logging of every login, grant, expiry, suspension, and prompt allow/deny decision.
+- 23 new automated tests: 13 unit tests + 10 real HTTP integration tests that spawn the compiled server. Total suite: 75/75 passing (`npm test`).
+Not done (see docs/GATE_B_IDENTITY_ENTITLEMENTS.md and NEXT_LEVEL_EXECUTION_BACKLOG.md for the full list):
+- No PostgreSQL — identity/entitlement storage is a single-process JSON file, explicitly documented as unsafe for multi-instance deployment.
+- No MFA, no project/tenant RBAC beyond a user/admin role flag.
+- No web payment gateway or Google Play Billing integration; no live payment processing of any kind.
+- This is a release-candidate implementation baseline, not a claim of deployed production auth, live billing, or Play Store approval.
+
+v1.9.11 — Marketing homepage + vector logo
+Added:
+- `public/home.html`: real marketing homepage (hero, capability grid, 4-stage pipeline explainer, pricing table). Not a mockup — a working static page.
+- `public/assets/logo.svg`: new crisp vector logo (JA monogram + network motif), used as an initial favicon (superseded in v1.9.12 — see below).
+- `public/index.html`: added a small "Home" link back to the marketing page. No functional/JS changes.
+- `public/pricing.html`: re-skinned to match the new brand palette, linked back to the homepage.
+Known limitation at the time (fixed in v1.9.12): the existing raster app icons were a bad crop cutting off the logo's tagline text, and the homepage used CSS Grid without being screenshot-verified.
+
+v1.9.12 — Verified brand fix + premium homepage rebuild
+Fixed:
+- App icons (`jalalai-icon-32/180/192/512.png`) were a bad crop of the source logo cutting off the tagline text (flagged as a known limitation in v1.9.11). Re-cropped from the user-provided source logo into a clean, centered, text-free square mark and regenerated all four sizes.
+- `public/home.html` v1 used CSS Grid for its main layouts. Rendered it with a real screenshot tool (`wkhtmltoimage`) and found it collapsed to a single column in an older WebKit engine. Converted every layout (hero split, capability row, pipeline row, pricing row) from Grid to Flexbox for broader compatibility, especially older Android WebViews. Re-screenshotted to confirm the fix at desktop (1440px) and mobile (390px) widths — both verified correct, not assumed.
+Changed:
+- `public/home.html` redesigned around the actual uploaded brand asset: the real rainbow/jewel-tone "JA" monogram is now the hero's visual centerpiece (`/assets/jalalai-mark.png`), the "JalalAI" wordmark uses the same gold→pink gradient as the source logo, and accent colors (ruby/gold/sapphire/emerald) are pulled from the logo's gem palette instead of a generic flat blue/violet scheme used in v1.9.11.
+- `public/assets/jalalai-logo-full.jpg`: full source logo, re-encoded as JPEG (no transparency needed) — 89KB vs. 774KB as PNG.
+- `public/assets/jalalai-mark.png`: clean square crop of just the mark, used in the homepage hero.
+Verified this pass (screenshots taken, not assumed):
+- Desktop (1440px): hero, capability grid, pipeline, and pricing table all render as designed.
+- Mobile (390px): hero stacks logo-then-text, capability cards go full-width, pipeline collapses to 2x2, pricing cards stack — all confirmed via screenshot.
+- `npm test`: 75/75 passing, unaffected by front-end-only changes.
+Still open / known limitation:
+- The rich illustrated mark does not stay legible at 32px (favicon size) — fine detail (gem facets, network lines) turns to visual noise that small. It works well at 180px+ (app icons, hero art). A simplified flat mark for favicon-only use would need a separate, deliberately reductive design pass — not done here.
+- Webfont loading (Fontshare CDN) could not be tested in this sandbox (no outbound network) — verify font rendering once deployed with real internet access.
+Added:
+- `public/home.html`: real marketing homepage (hero, capability grid, 4-stage pipeline explainer, pricing table). Not a mockup — a working static page.
+- `public/assets/logo.svg`: new crisp vector logo (JA monogram + network motif, matches existing brand gradient). Used as the favicon on the new pages.
+- `public/index.html`: added a small "Home" link back to the marketing page. No functional/JS changes — command center behavior is untouched.
+- `public/pricing.html`: re-skinned to match the new brand palette, linked back to the homepage.
+Known limitation (not fixed in this pass):
+- `public/assets/jalalai-icon-512.png` (and the other raster icons) are a bad crop of a rectangular source image — the tagline text is cut off at the bottom. Regenerating a clean square PNG at each required size needs an image-generation/design tool, which was not available in this session. The new `logo.svg` is the clean source to re-export from once such a tool is available; it is not yet wired into `manifest.webmanifest` in place of the PNGs because Android/PWA install icons still need PNG fallbacks for full compatibility.
+- No screenshot/visual QA was possible in this session (no headless browser / no network to fetch the webfonts used). Open `public/home.html` directly in a real browser to review before publishing it.
+
+v1.9.13 — JazzCash + Easypaisa payment webhooks (Gate E, server-side)
+Added:
+- `src/billing/gateways.ts`: JazzCash HMAC-SHA256 `pp_SecureHash` verification implementing their published algorithm exactly (sort pp_ fields, join with '&', prepend Integrity Salt, HMAC-SHA256). Generic HMAC-SHA256 verifier for Easypaisa/other gateways that sign a raw body with a shared secret.
+- Order lifecycle in `src/identity/service.ts`: `createOrder` (user clicks upgrade -> pending order with a 30-minute expiry), `fulfillOrder` (called only after signature verification passes; idempotent against duplicate webhook deliveries, which every real gateway sends), `rejectOrder`.
+- Endpoints: `POST /v1/billing/create-order` (requires a logged-in session), `POST /v1/webhooks/jazzcash`, `POST /v1/webhooks/easypaisa`.
+- Every order created, fulfilled, or rejected is audit-logged with the gateway and transaction id.
+- 15 new tests: 9 unit tests (signature accept/reject/tamper, order create/fulfill/idempotent-replay/reject) + 6 new HTTP integration tests (full purchase flow end-to-end for both gateways, plus rejection of unsigned callbacks). Total suite: 89/89 passing.
+Explicitly NOT done / NOT verified:
+- Neither webhook has been tested against a real JazzCash or Easypaisa sandbox merchant account — no live credentials were available while building this. The algorithms match each gateway's public documentation, but "matches the docs" is not the same as "confirmed against a live test transaction." Verify in each gateway's sandbox before accepting real payments.
+- No frontend purchase UI. `home.html`/`pricing.html` do not yet have a login form or an "Upgrade" button wired to `/v1/billing/create-order`. The backend is ready to be called; nothing calls it yet.
+- Easypaisa's exact webhook signing scheme varies by integration type (Hosted Checkout vs Open API) in their own documentation. The generic HMAC verifier here assumes a raw-body HMAC-SHA256 signature in a header — confirm this matches your specific Easypaisa merchant integration type before going live, and adjust `verifyGenericHmacSignature`'s usage if it differs.
+- Required environment variables for production: `JALALAI_JAZZCASH_INTEGRITY_SALT`, `JALALAI_EASYPAISA_HASH_KEY`. Neither has a default; webhooks fail closed (401) if unset.
+
+v1.9.14 — Frontend purchase flow + real routing fixes (found by actually running the server)
+Added:
+- `public/account.html`: real end-user login/register page. Register or log in, see your plan and today's usage, pick Pro or Ultra, click through to a live JazzCash checkout redirect. Session token stored in `localStorage`, calls `/v1/me`, `/v1/billing/create-order`.
+- `public/home.html` and nav now link to `/account.html` for sign-up/login instead of dropping straight into the app with no account.
+- `public/pricing.html` consolidated into a redirect to `/home.html#pricing` — kept as a separate static page it would have silently drifted out of sync with the real pricing section; a redirect can't drift.
+Fixed (found by actually spinning up the compiled server and curling every route, not by assumption):
+- `public/home.html` and `public/account.html` were **not reachable at all** through the real server — `src/api/server.ts` uses an explicit URL whitelist, and neither page's route existed. Screenshots taken in v1.9.12 looked correct because they were rendered against a generic Python static file server, which does not have this restriction — that masked the bug. Added explicit routes for both.
+- `/assets/` only served `.png` files. The homepage's `.jpg` (optimized full logo) and `.svg` (original vector logo) both 404'd. Broadened the allowlist to `.png/.jpg/.jpeg/.svg/.webp` with correct per-extension content types.
+- `/index.html` itself 404'd — the server only recognized `/` and `/app` for the command center, but the new pages link to `/index.html` directly. Added it as a third alias for the same handler.
+- `/health` reported a stale hardcoded version (`1.9.10`) three releases behind. Now `1.9.14`.
+Verified end-to-end against the actual compiled, running server (not just unit tests):
+- Every new route returns 200: `/home.html`, `/account.html`, `/index.html`, `/assets/*.svg`, `/assets/*.jpg`, `/pricing`.
+- Full purchase flow for both Pro and Ultra: register a real user → create a real order → generate a real signed JazzCash checkout form, confirmed the correct PKR-to-paisa amount (100000 for Pro, 300000 for Ultra) and merchant fields appear in the returned form.
+- `npm test`: 93/93 passing.
+Still open:
+- The signed checkout form has still never been submitted to JazzCash's actual sandbox — only generated and inspected locally. You need a real JazzCash merchant account to complete that verification.
+- Easypaisa has no checkout-page redirect (webhook-confirmation side works; the "pay" side does not) — their hosted-checkout field format wasn't confirmed against live documentation, see v1.9.13 notes.
+
+v1.9.15 — Simple/Advanced view toggle (from the SJALALAI concept, adapted to the real backend)
+Context: the user shared a second, unrelated prototype project ("SJALALAI") built in a different
+conversation — a free LLM-router + coding-skills tool with a Simple/Pro mode UI concept, no real
+backend, and a chat feature that does not actually work (its fetch call to api.anthropic.com has no
+API key and would fail from any browser due to CORS). That project's business model, backend, and
+platform target directly contradict this one and were NOT merged. Only the Simple/Advanced UI pattern
+was adapted, and wired to this app's real, already-working /v1/tasks endpoint — not the broken prototype code.
+Added:
+- `public/index.html`, `public/app.css`, `public/app.js`: a Simple/Advanced toggle in the command
+  center header. Simple (default for new visitors) shows just the task box and answer. Advanced
+  (persisted via localStorage) shows the full panel set: file upload, mode picker, execution
+  timeline, and sources/evidence. Purely presentational — no backend change, same real task engine
+  underneath either way.
+Verified:
+- `npm test`: 93/93 passing (frontend-only change, does not touch server logic).
+- Toggle logic verified correct in isolation via a minimal DOM mock in Node (classList state
+  transitions checked directly).
+- Confirmed via a dedicated test page that this sandbox's local screenshot tool (`wkhtmltoimage`)
+  cannot execute `async function` syntax at all — a parse error in it kills the entire script file,
+  which is why an earlier screenshot of this page looked non-functional. This affects every version
+  of `app.js` going back to before this change (it has always used `async function` for its core
+  task-running logic) and is a limitation of the local verification tool only, not the shipped code.
+  Real browsers (Chrome/Firefox/Safari/Edge, anything from ~2017 onward) fully support this syntax.
+Not done:
+- No visual screenshot of the toggle actually switching views could be captured in this sandbox for
+  the reason above. If you want visual confirmation, open `index.html` in a real browser and click
+  Simple/Advanced yourself — the underlying logic has been verified two other ways, but not by eye.
+
+v1.9.16 — Real accessibility fixes from the UI/UX Pro Max skill's rule set (not a full merge)
+Context: the user asked to merge everything from 5 uploaded sources (SJALALAI docs/prototype,
+the UI/UX Pro Max design skill, and their zips) into "one complete platform, nothing pending."
+That instruction was not carried out literally — see the chat response for why (the actual
+freellmapi/superpowers source code was never uploaded, only referenced in docs; and SJALALAI's
+"free forever" model directly contradicts this app's tested paid entitlement system). What WAS
+done: real, checkable accessibility fixes using the UI/UX Pro Max skill's actual published rules
+(contrast, focus states, form labels), applied to the real app — not a vague "improve everything."
+Fixed:
+- `public/account.html`: `input:focus{outline:none}` removed the browser's focus ring with no
+  adequate replacement (fails the skill's "visible focus rings" rule and WCAG 2.2). Replaced with
+  a visible 2px outline plus border-color change.
+- `public/index.html`: the task textarea, file input, and mode selector relied on placeholder
+  text / visual position only, with no associated `<label>` — flagged directly as an anti-pattern
+  ("Placeholder-only label") in the skill's rule set. Added proper (visually-hidden, since the
+  existing visual design doesn't need visible labels here) `<label for="...">` elements for all
+  three, plus `role="alert"` on the error message region so screen readers announce failures.
+- `public/app.js`: the Simple/Advanced toggle buttons now set `aria-pressed` reflecting real state,
+  not just a CSS class — assistive tech can now tell which view is active.
+Verified, not assumed:
+- Computed actual WCAG contrast ratios for the color tokens used: 6.8:1 to 18.3:1 against the
+  4.5:1 AA minimum for body text — all pass. Checked with a real luminance/contrast calculation,
+  not eyeballed.
+- Confirmed the new markup (`visuallyHidden`, `aria-label="View mode"`, `role="alert"`) is actually
+  present in what the real running server serves at `/index.html` (curled it, not assumed).
+- `npm test`: 93/93 passing.
+Explicitly NOT done (see chat for the full explanation):
+- Did not import freellmapi (34-provider LLM router) or superpowers (11-skill agent methodology)
+  source code — it was never uploaded, only referenced in markdown docs. There is nothing to merge.
+- Did not remove the Free/Pro/Ultra paywall to match SJALALAI's "everything free" model — this
+  would delete tested, working billing infrastructure (JazzCash/Easypaisa webhooks) on the basis
+  of an unbuilt prototype. Needs an explicit decision from the user, not a silent overwrite.
+- Did not literally combine all uploaded files into "one file" — a Python data/rules skill, a
+  Node/TypeScript backend, and static HTML/CSS/JS are different runtimes serving different
+  purposes; concatenating them into one file would not run.
+
+v1.9.17 — Real UI/UX Pro Max integration + honest superpowers documentation
+Context: user asked to bring the "working skill" of both superpowers and UI/UX Pro Max into the
+platform. UI/UX Pro Max was actually uploaded (real Python scripts, real rule data) so real
+integration was possible. superpowers was never uploaded anywhere in this project — only its
+practice names were mentioned secondhand in another project's docs — so there was no file content
+to bring in; see docs/DEVELOPMENT_PRACTICES.md for exactly what was done instead and why.
+Added:
+- `docs/DESIGN_SYSTEM.md`: distilled from the UI/UX Pro Max skill's actual published rules
+  (`templates/base/quick-reference.md`), mapped to this project's real color tokens and components,
+  with an explicit honesty note about what was and wasn't copied from the skill (its icon catalog
+  ships React import statements, not raw SVG paths — original icons were hand-authored instead of
+  fabricating a false "these are Phosphor icons" claim).
+- `docs/DEVELOPMENT_PRACTICES.md`: this project's own development discipline, organized under the
+  same widely-known practice names superpowers uses (plan-first, TDD, systematic debugging,
+  verification-before-completion), matched against this project's actual release history as
+  evidence — explicitly labeled as inspired-by, not copied-from, since no source files exist here.
+- `public/home.html`: replaced the four plain colored capability dots with original, hand-authored
+  SVG icons (magnifying glass, document, code brackets, sparkle), following the skill's exact
+  accessibility rule for decorative icons beside visible text (`aria-hidden="true"`).
+Verified:
+- Screenshotted the actual capability section on the real running server — icons render correctly,
+  colored, in place (not assumed from markup alone).
+- `npm test`: 93/93 passing.

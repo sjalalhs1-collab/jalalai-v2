@@ -1,0 +1,26 @@
+{
+  "documents": [
+    {
+      "id": "attachment:a1",
+      "name": "notes.txt",
+      "source": "attachment://a1",
+      "mimeType": "text/plain",
+      "createdAt": 1789027888722,
+      "updatedAt": 1789449796701,
+      "metadata": {
+        "taskId": "v09-file"
+      }
+    }
+  ],
+  "chunks": [
+    {
+      "id": "attachment:a1:0",
+      "documentId": "attachment:a1",
+      "source": "attachment://a1",
+      "name": "notes.txt",
+      "text": "Important project notes.",
+      "index": 0,
+      "createdAt": 1789449796701
+    }
+  ]
+}
