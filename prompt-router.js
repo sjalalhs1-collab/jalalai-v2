@@ -1,0 +1,1 @@
+export function normalizeCreativePrompt(p) { const common = `Objective: ${p.prompt.trim()}\nOutput: ${p.format ?? 'high quality, production-ready result'}\nConstraints: accurate, clear, safe, no invented brand assets unless supplied.`; return { kind: p.kind, prompt: common, negative: p.negative ?? '' }; }

@@ -4,11 +4,10 @@
 - [ ] Replace demo/operator token auth with real user authentication. — PARTIAL: real per-user auth (register/login/session, scrypt hashing) now exists (`src/identity/`) and is wired into `/v1/tasks`; the operator token still works in parallel for internal/admin calls by design. Not yet backed by a managed identity provider (e.g. OAuth/OIDC).
 - [ ] Add RBAC and project-level permissions. — PARTIAL: a `user`/`admin` role flag exists; no project/tenant scoping yet.
 - [ ] Add MFA-ready account security.
-- [ ] Add PostgreSQL schema and migrations. — PARTIAL (Sept 2026 audit): schema written (`deploy/postgres/001_init.sql`), mapped to `src/identity/types.ts`. **Not wired into the app** — `IdentityStore` is still the synchronous JSON-file store. See `docs/GATE_A_POSTGRES_MIGRATION.md` for the exact remaining work (async store rewrite, ~29 call sites in `service.ts`). Schema itself has not been run against a live Postgres instance — validate before trusting it.
-- [ ] Add Redis-backed queue and durable task state. — NOT DONE: `docker-compose.yml` now provisions a Redis container, but nothing in the app talks to it yet. `activeTasks` and rate-limiter state are still in-process memory.
-- [ ] Add object storage for uploads/artifacts. — NOT DONE.
-- [ ] Add idempotency keys and retry policies. — PARTIAL: `webhook_receipts` table exists in the new schema for webhook replay protection, not yet used by `server.ts` (still reads/writes the JSON store, which has no replay guard).
-- [x] Containerize the app and add CI. — `Dockerfile` (multi-stage, includes Python/LibreOffice for Office artifact generation), `docker-compose.yml` (app+Postgres+Redis scaffold), `.github/workflows/ci.yml` (typecheck+build+test+docker build). **Unverified**: no Docker daemon was available in the environment this was written in, so the image has not actually been built or run — build it yourself before deploying.
+- [ ] Add PostgreSQL schema and migrations. — NOT DONE: identity/entitlement data is a single-process JSON file (see `docs/GATE_B_IDENTITY_ENTITLEMENTS.md`), explicitly unsafe for multi-instance deployment.
+- [ ] Add Redis-backed queue and durable task state.
+- [ ] Add object storage for uploads/artifacts.
+- [ ] Add idempotency keys and retry policies.
 
 ## Gate B — Safe autonomous execution
 (Note: this label collides with `docs/GATE_B_IDENTITY_ENTITLEMENTS.md`, which uses "Gate B" for identity/entitlements. That document's scope is tracked separately below under "Identity & Entitlements".)

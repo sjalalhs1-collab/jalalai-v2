@@ -1,3 +1,3 @@
-export function constantTimeTokenEqual(a:string,b:string){let diff=a.length^b.length;const n=Math.max(a.length,b.length);for(let i=0;i<n;i++)diff|=(a.charCodeAt(i)^b.charCodeAt(i));return diff===0}
-export function isPrivateHostname(hostname:string){const h=hostname.toLowerCase();if(h==='localhost'||h.endsWith('.localhost')||h==='0.0.0.0'||h==='::1'||h==='[::1]')return true;const m=h.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);if(!m)return false;const p=m.slice(1).map(Number);const [a,b]=p;if(a===10||a===127||a===0||a>=224)return true;if(a===169&&b===254)return true;if(a===172&&b>=16&&b<=31)return true;if(a===192&&b===168)return true;return false}
-export function assertPublicHttpUrl(raw:string){let u:URL;try{u=new URL(raw)}catch{throw new Error('valid_http_url_required')}if(!['http:','https:'].includes(u.protocol))throw new Error('only_http_https_allowed');if(u.username||u.password)throw new Error('url_credentials_forbidden');if(isPrivateHostname(u.hostname))throw new Error('private_network_url_blocked');return u}
+import {browserAutomate} from './browser-automation.js';
+import type {Tool} from './registry.js';
+export function createProductionTools():Tool[]{return [{id:'browser.automate',description:'Optional Playwright browser automation for public web pages with explicit web permission.',permission:'web',execute:browserAutomate}]}
