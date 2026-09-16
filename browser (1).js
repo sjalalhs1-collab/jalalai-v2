@@ -1,0 +1,5 @@
+export const browserOpenTool = { id: 'browser.open', description: 'Fetch a public HTTP(S) page and return cleaned text', permission: 'web', async execute(input, ctx) { if (!ctx.permissions.web)
+        throw new Error('Permission denied: web'); const url = String(input).trim(); if (!/^https?:\/\//i.test(url))
+        throw new Error('Only HTTP(S) URLs are allowed'); const u = new URL(url); if (u.username || u.password)
+        throw new Error('Credential-bearing URLs are blocked'); const r = await fetch(u, { redirect: 'follow', headers: { 'user-agent': 'JalalAI/1.3 browser' } }); if (!r.ok)
+        throw new Error(`HTTP ${r.status}`); const html = await r.text(); const text = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim(); return { url: r.url, status: r.status, title: (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? r.url).replace(/\s+/g, ' ').trim().slice(0, 300), text: text.slice(0, 30000) }; } };

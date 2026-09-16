@@ -1,11 +1,11 @@
-# JalalAI v1.9.2 — Final QA Report
+# JalalAI v1.9.17 — Final QA Report
 
 ## Automated QA
-- `npm test`: **42/42 passed, 0 failed**
+- `npm test`: **93/93 passed, 0 failed**
 - TypeScript build: **PASS**
 - Browser JS syntax check (`node --check public/app.js`): **PASS**
 - Demo without provider keys: **PASS** and explicitly reports DEMO MODE
-- Package version: **1.9.2**
+- Package version: **1.9.17**
 
 ## HTTP/security smoke checks
 - `/`: PASS (200)
@@ -23,4 +23,4 @@
 This ZIP is a **QA-passed implementation baseline / release candidate**. It is not a claim that JalalAI is already deployed as a public SaaS or published on Google Play. Real provider credentials, production auth, managed infrastructure, payment verification, Android AAB signing and store approval remain external deployment gates.
 
 ## Approved
-JalalAI v1.9.2 is approved for the next deployment/integration stage, with the external production gates documented in `docs/PRODUCTION_DEPLOYMENT_FINAL.md`.
+JalalAI v1.9.17 is approved for the next deployment/integration stage, with the external production gates documented in `docs/PRODUCTION_DEPLOYMENT_FINAL.md`.

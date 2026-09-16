@@ -1,8 +1,3 @@
-# Local/staging stack. Postgres and Redis are included here so the compose file
-# already matches Gate A's target architecture — but the app image itself still
-# reads/writes data/jalalai-identity.json today (see deploy/postgres/001_init.sql
-# and docs/GATE_A_POSTGRES_MIGRATION.md for what's needed to actually use them).
-version: "3.9"
 services:
   app:
     build: .
@@ -10,42 +5,37 @@ services:
       - "8787:8787"
     environment:
       NODE_ENV: production
-      JALALAI_REQUIRE_AUTH: "true"
-      JALALAI_API_TOKEN: ${JALALAI_API_TOKEN}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      JALALAI_JAZZCASH_INTEGRITY_SALT: ${JALALAI_JAZZCASH_INTEGRITY_SALT}
-      JALALAI_EASYPAISA_HASH_KEY: ${JALALAI_EASYPAISA_HASH_KEY}
-      DATABASE_URL: postgres://jalalai:jalalai@postgres:5432/jalalai
+      PORT: 8787
+      DATABASE_URL: postgresql://jalalai:jalalai@postgres:5432/jalalai
       REDIS_URL: redis://redis:6379
-    volumes:
-      - jalalai_data:/app/data
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
 
   postgres:
     image: postgres:16-alpine
     environment:
+      POSTGRES_DB: jalalai
       POSTGRES_USER: jalalai
       POSTGRES_PASSWORD: jalalai
-      POSTGRES_DB: jalalai
     volumes:
-      - pg_data:/var/lib/postgresql/data
-      - ./deploy/postgres:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jalalai -d jalalai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
+    restart: unless-stopped
 
 volumes:
-  jalalai_data:
-  pg_data:
+  postgres_data:
   redis_data:

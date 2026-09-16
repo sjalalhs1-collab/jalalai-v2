@@ -1,0 +1,1 @@
+export function securityConfig() { return { requireAuth: process.env.JALALAI_REQUIRE_AUTH !== 'false', corsOrigin: process.env.JALALAI_CORS_ORIGIN ?? 'http://localhost:8787', maxBodyBytes: Math.min(25_000_000, Math.max(100_000, Number(process.env.JALALAI_MAX_BODY_BYTES ?? 5_000_000))), rateLimit: Math.max(0, Number(process.env.JALALAI_RATE_LIMIT ?? 60)) }; }

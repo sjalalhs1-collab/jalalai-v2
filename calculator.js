@@ -1,0 +1,6 @@
+import { canExecute } from '../security/permissions.js';
+export const calculatorTool = { id: 'calculator', description: 'Evaluate a basic arithmetic expression without network or filesystem access', permission: 'code', async execute(input, ctx) { if (!canExecute('code', ctx.permissions))
+        throw new Error('Permission denied: code'); const expr = String(input).trim(); if (expr.length > 500)
+        throw new Error('Expression too long'); if (!/^[0-9+\-*/().%\s]+$/.test(expr))
+        throw new Error('Only arithmetic characters are allowed'); const value = Function(`"use strict";return (${expr})`)(); if (typeof value !== 'number' || !Number.isFinite(value))
+        throw new Error('Invalid numeric result'); return { expression: expr, result: value }; } };

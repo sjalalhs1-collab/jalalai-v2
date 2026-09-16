@@ -1,0 +1,51 @@
+export class AnthropicProvider {
+    apiKey;
+    defaultModel;
+    id = 'anthropic';
+    constructor(apiKey = process.env.ANTHROPIC_API_KEY ?? '', defaultModel = process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-5') {
+        this.apiKey = apiKey;
+        this.defaultModel = defaultModel;
+    }
+    async health() { return Boolean(this.apiKey); }
+    async listModels() { return [this.defaultModel]; }
+    body(r, stream = false) { const system = r.messages.filter(m => m.role === 'system').map(m => m.content).join('\n'); const messages = r.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content })); const b = { model: r.model ?? this.defaultModel, max_tokens: r.maxTokens ?? 2048, messages, stream }; if (system)
+        b.system = system; if (r.temperature !== undefined)
+        b.temperature = r.temperature; return b; }
+    async generate(r) { if (!this.apiKey)
+        throw new Error('ANTHROPIC_API_KEY is not configured'); const t = Date.now(); const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'x-api-key': this.apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' }, body: JSON.stringify(this.body(r)), signal: r.signal }); const data = await res.json(); if (!res.ok)
+        throw new Error(`Anthropic ${res.status}: ${data?.error?.message ?? 'request failed'}`); const text = (data.content ?? []).filter((x) => x.type === 'text').map((x) => x.text).join('\n'); return { provider: this.id, model: data.model ?? r.model ?? this.defaultModel, text, latencyMs: Date.now() - t, inputTokens: data.usage?.input_tokens, outputTokens: data.usage?.output_tokens, raw: data }; }
+    async generateStream(r, onChunk) { if (!this.apiKey)
+        throw new Error('ANTHROPIC_API_KEY is not configured'); const t = Date.now(); const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'x-api-key': this.apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' }, body: JSON.stringify(this.body(r, true)), signal: r.signal }); if (!res.ok) {
+        const data = await res.json();
+        throw new Error(`Anthropic ${res.status}: ${data?.error?.message ?? 'stream request failed'}`);
+    } if (!res.body)
+        throw new Error('Anthropic streaming body unavailable'); const reader = res.body.getReader(), decoder = new TextDecoder(); let buffer = '', text = '', model = r.model ?? this.defaultModel, usage; while (true) {
+        const { value, done } = await reader.read();
+        if (done)
+            break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+            if (!line.startsWith('data:'))
+                continue;
+            let d;
+            try {
+                d = JSON.parse(line.slice(5).trim());
+            }
+            catch {
+                continue;
+            }
+            if (d.type === 'content_block_delta' && d.delta?.type === 'text_delta') {
+                text += d.delta.text;
+                onChunk({ type: 'text', text: d.delta.text });
+            }
+            if (d.type === 'message_delta')
+                usage = d.usage ?? usage;
+            if (d.type === 'message_start') {
+                model = d.message?.model ?? model;
+                usage = d.message?.usage ?? usage;
+            }
+        }
+    } const out = { provider: this.id, model, text, latencyMs: Date.now() - t, inputTokens: usage?.input_tokens, outputTokens: usage?.output_tokens }; onChunk({ type: 'done', response: out }); return out; }
+}

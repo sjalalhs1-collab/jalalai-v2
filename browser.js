@@ -1,0 +1,5 @@
+export class BrowserResearch {
+    async open(url, maxChars = 30000) { if (!/^https?:\/\//i.test(url))
+        throw new Error('Only HTTP(S) URLs are allowed'); const res = await fetch(url, { headers: { 'user-agent': 'JalalAI/0.6 research' } }); if (!res.ok)
+        throw new Error(`Page fetch failed: ${res.status}`); const html = await res.text(); const title = (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? url).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(); const text = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim().slice(0, maxChars); return { url, title, text, retrievedAt: Date.now() }; }
+}
